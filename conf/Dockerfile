@@ -8,18 +8,21 @@ RUN apt-get update \
     && apt-get install -y python2.7 \
     && alias python=/usr/bin/python2.7
 
-#wget \
-#    && apt-get install -y bzip2 \
-#    && apt-get install -y tar \
-#    && apt-get install -y build-essential \
-#    && apt-get install -y zlib1g-dev
-ADD visioner.py /usr/local/src/visioner.py
-# this downloads the bwa source, makes it, moves it into place, then removes
-# the downloads in one transaction to make sure downloads do not remain
-# in the image
-CMD python /usr/local/src/visioner.py
 
-# this creates a default command that gets
+# This adds the python script from the host to the Docker image
+# Any folders/files being added must be added from within the build
+# context or it subdirectories because "the first step of docker build
+# is to send the context directory/subdirectories to the docker daemon.
+ADD visioner.py /usr/local/src/visioner.py
+
+# This creates a default command that is
 # run when the container is run without arguments
-# it will print the usage + version of bwa and exit
-#ENTRYPOINT ["bwa"]
+# It will call the python interpreter so we can run some script
+ENTRYPOINT ["python"]
+
+# This will be the default argument to the ENTRYPOINT
+# If we type   $ docker run -ti <image_name>
+# with no arguments, it will run this script by default.
+# If we add other scripts here we can simply type
+#   $ docker run -ti <image_name> <other_script.py>
+CMD ["/usr/local/src/visioner.py"]
